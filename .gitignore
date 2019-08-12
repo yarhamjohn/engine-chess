@@ -1,6 +1,9 @@
 # IDE specific
 **/.idea/
 
+# User specific
+*.user
+
 # Build Results
 bin/
 obj/
