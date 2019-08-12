@@ -24,7 +24,8 @@ namespace engine_tests
                     {null, null, null, null, null, null, null, null},
                     {new Pawn(white), new Pawn(white), new Pawn(white), new Pawn(white), new Pawn(white), new Pawn(white), new Pawn(white), new Pawn(white)},
                     {new Rook(white), new Knight(white), new Bishop(white), new Queen(white), new King(white), new Bishop(white), new Knight(white), new Rook(white)}
-                }
+                },
+                ErrorMessage = null
             };
 
             var engine = new ChessEngine();

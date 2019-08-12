@@ -7,6 +7,7 @@ namespace engine.Board
     public class ChessBoard : IEquatable<ChessBoard>
     {
         public ChessPiece[,] ChessPieces = new ChessPiece[8, 8];
+        public string ErrorMessage;
 
         public bool Equals(ChessBoard other)
         {

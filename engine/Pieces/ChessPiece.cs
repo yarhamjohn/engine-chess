@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 
 namespace engine.Pieces
 {
     public abstract class ChessPiece : IEquatable<ChessPiece>
     {
         protected abstract string Type { get; set; }
-        protected abstract string Colour { get; set; }
+        protected internal abstract string Colour { get; set; }
         protected abstract string Symbol { get; set; }
+        protected internal abstract List<(int x, int y)> NormalMoves { get; set; }
 
         public bool Equals(ChessPiece other)
         {
@@ -14,6 +16,11 @@ namespace engine.Pieces
             if (ReferenceEquals(this, other)) return true;
 
             return Type == other.Type && Colour == other.Colour && Symbol == other.Symbol;
+        }
+
+        public override string ToString()
+        {
+            return $"{Colour} {Type}";
         }
     }
 }
