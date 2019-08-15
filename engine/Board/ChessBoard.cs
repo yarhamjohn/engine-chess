@@ -21,5 +21,11 @@ namespace engine.Board
             return bothTwoDimensional && equalDimensions &&
                    ChessPieces.Cast<ChessPiece>().SequenceEqual(other.ChessPieces.Cast<ChessPiece>());
         }
+
+        public Position GetPiecePosition(ChessPiece piece)
+        {
+            
+            return new Position();
+        }
     }
 }

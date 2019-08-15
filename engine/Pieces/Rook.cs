@@ -8,6 +8,7 @@ namespace engine.Pieces
         protected internal sealed override string Colour { get; set; }
         protected sealed override string Symbol { get; set; }
         protected internal sealed override List<(int x, int y)> NormalMoves { get; set; }
+        protected internal sealed override List<(int x, int y)> SpecialMoves { get; set; }
 
         public Rook(string colour)
         {
@@ -19,6 +20,7 @@ namespace engine.Pieces
                 (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), 
                 (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)
             };
+            SpecialMoves = new List<(int x, int y)>();
         }
     }
 }

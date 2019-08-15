@@ -9,6 +9,7 @@ namespace engine.Pieces
         protected internal abstract string Colour { get; set; }
         protected abstract string Symbol { get; set; }
         protected internal abstract List<(int x, int y)> NormalMoves { get; set; }
+        protected internal abstract List<(int x, int y)> SpecialMoves { get; set; }
 
         public bool Equals(ChessPiece other)
         {

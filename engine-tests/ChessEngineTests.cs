@@ -52,7 +52,7 @@ namespace engine_tests
             var targetPosition = new Position { Column = 0, Row = 0};
             var newChessBoard = engine.MoveChessPiece(startingChessBoard, startingPosition, targetPosition);
 
-            Assert.AreEqual(newChessBoard.ErrorMessage, "The starting position (Row: 8, Col: -1) and/or the targetPosition (Row: 0, Col: 0) is not on the board");
+            Assert.AreEqual(newChessBoard.ErrorMessage, "The starting position (Row: 8, Col: -1) is not on the board");
             Assert.AreEqual(startingChessBoard, newChessBoard);
         }
         
@@ -64,7 +64,7 @@ namespace engine_tests
             var targetPosition = new Position { Column = 8, Row = -1};
             var newChessBoard = engine.MoveChessPiece(startingChessBoard, startingPosition, targetPosition);
 
-            Assert.AreEqual(newChessBoard.ErrorMessage, "The starting position (Row: 0, Col: 0) and/or the targetPosition (Row: -1, Col: 8) is not on the board");
+            Assert.AreEqual(newChessBoard.ErrorMessage, "The targetPosition (Row: -1, Col: 8) is not on the board");
             Assert.AreEqual(startingChessBoard, newChessBoard);
         }   
         
@@ -77,18 +77,6 @@ namespace engine_tests
             var newChessBoard = engine.MoveChessPiece(startingChessBoard, startingPosition, targetPosition);
 
             Assert.AreEqual(newChessBoard.ErrorMessage, "There is no piece in the starting position (Row: 2, Col: 0)");
-            Assert.AreEqual(startingChessBoard, newChessBoard);
-        } 
-        
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfTargetPositionContainsPieceFromSameTeam()
-        {
-            var engine = new ChessEngine();
-            var startingPosition = new Position { Column = 0, Row = 0};
-            var targetPosition = new Position { Column = 0, Row = 1};
-            var newChessBoard = engine.MoveChessPiece(startingChessBoard, startingPosition, targetPosition);
-
-            Assert.AreEqual(newChessBoard.ErrorMessage, "The target position (Row: 1, Col: 0) is already occupied by a piece (black Pawn) from the same team");
             Assert.AreEqual(startingChessBoard, newChessBoard);
         }
     }
