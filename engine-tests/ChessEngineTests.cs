@@ -10,6 +10,7 @@ namespace engine_tests
         private const string Black = "black";
         private const string White = "white";
         private ChessBoard _startingChessBoard;
+        private ChessBoard _castlingChessBoard;
 
         [SetUp]
         public void Setup()
@@ -19,6 +20,22 @@ namespace engine_tests
                 ChessPieces = new ChessPiece[,]
                 {
                     {new Rook(Black), new Knight(Black), new Bishop(Black), new Queen(Black), new King(Black), new Bishop(Black), new Knight(Black), new Rook(Black)},
+                    {new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black)},
+                    {null, null, null, null, null, null, null, null},
+                    {null, null, null, null, null, null, null, null},
+                    {null, null, null, null, null, null, null, null},
+                    {null, null, null, null, null, null, null, null},
+                    {new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White)},
+                    {new Rook(White), new Knight(White), new Bishop(White), new Queen(White), new King(White), new Bishop(White), new Knight(White), new Rook(White)}
+                },
+                ErrorMessage = null
+            };
+            
+            _castlingChessBoard = new ChessBoard
+            {
+                ChessPieces = new ChessPiece[,]
+                {
+                    {new Rook(Black), null, null, null, new King(Black), null, null, new Rook(Black)},
                     {new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black)},
                     {null, null, null, null, null, null, null, null},
                     {null, null, null, null, null, null, null, null},
@@ -111,34 +128,83 @@ namespace engine_tests
         }
         
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheKingHasAlreadyMoved()
-        {
-            var engine = new ChessEngine();
-            var startingPosition = new Position { Column = 4, Row = 0};
-            var targetPosition = new Position { Column = 2, Row = 0};
-            
-            _startingChessBoard.ChessPieces[startingPosition.Row, startingPosition.Column].MarkAsMoved();
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
-
-            const string expectedErrorMessage = "This special move (Rows: 0, Cols: -2) is not valid at this time.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
-        }
-        
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheCastleHasAlreadyMoved()
+        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheMoveIsBlocked()
         {
             var engine = new ChessEngine();
             var startingPosition = new Position { Column = 4, Row = 0};
             var targetPosition = new Position { Column = 6, Row = 0};
 
-            var castlePosition = new Position() {Column = 7, Row = 0};
-            _startingChessBoard.ChessPieces[castlePosition.Row, castlePosition.Column].MarkAsMoved();
             var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
 
             const string expectedErrorMessage = "This special move (Rows: 0, Cols: 2) is not valid at this time.";
             Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
             Assert.AreEqual(_startingChessBoard, newChessBoard);
+        }
+        
+        [Test]
+        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheKingHasAlreadyMoved()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position { Column = 4, Row = 0};
+            var targetPosition = new Position { Column = 2, Row = 0};
+
+            _castlingChessBoard.ChessPieces[startingPosition.Row, startingPosition.Column].MarkAsMoved();
+            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
+
+            const string expectedErrorMessage = "This special move (Rows: 0, Cols: -2) is not valid at this time.";
+            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
+            Assert.AreEqual(_castlingChessBoard, newChessBoard);
+        }
+        
+        [Test]
+        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheRookHasAlreadyMoved()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position { Column = 4, Row = 0};
+            var targetPosition = new Position { Column = 6, Row = 0};
+            var rookPosition = new Position() {Column = 7, Row = 0};
+            
+            _castlingChessBoard.ChessPieces[rookPosition.Row, rookPosition.Column].MarkAsMoved();
+            
+            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
+
+            const string expectedErrorMessage = "This special move (Rows: 0, Cols: 2) is not valid at this time.";
+            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
+            Assert.AreEqual(_castlingChessBoard, newChessBoard);
+        }
+        
+        [Test]
+        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButThereIsNoPiece()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position { Column = 4, Row = 0};
+            var targetPosition = new Position { Column = 6, Row = 0};
+            var rookPosition = new Position() {Column = 7, Row = 0};
+
+            _castlingChessBoard.ChessPieces[rookPosition.Row, rookPosition.Column] = null;
+            
+            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
+
+            const string expectedErrorMessage = "This special move (Rows: 0, Cols: 2) is not valid at this time.";
+            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
+            Assert.AreEqual(_castlingChessBoard, newChessBoard);
+        }
+        
+        [Test]
+        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButThereIsADifferentPiece()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position { Column = 4, Row = 0};
+            var targetPosition = new Position { Column = 2, Row = 0};
+            var rookPosition = new Position() {Column = 0, Row = 0};
+
+            _castlingChessBoard.ChessPieces[rookPosition.Row, rookPosition.Column] = new Queen("black");
+            
+            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
+
+            const string expectedErrorMessage = "This special move (Rows: 0, Cols: -2) is not valid at this time.";
+            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
+            Assert.AreEqual(_castlingChessBoard, newChessBoard);
         }
     }
 }

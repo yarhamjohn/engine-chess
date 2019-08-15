@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using System.Linq;
 using engine.Board;
 using engine.Pieces;
 
@@ -45,7 +46,7 @@ namespace engine
             }
 
             var move = new Move(sourcePosition, targetPosition);
-            
+
             if (!IsValidNormalMove(pieceInSource, move) &&
                 !IsValidSpecialMove(pieceInSource, move))
             {
@@ -58,7 +59,8 @@ namespace engine
 
             if (IsValidSpecialMove(pieceInSource, move) && !SpecialMoveIsPossible(chessBoard, pieceInSource, move))
             {
-                chessBoard.ErrorMessage = $"This special move (Rows: {move.X}, Cols: {move.Y}) is not valid at this time.";
+                chessBoard.ErrorMessage =
+                    $"This special move (Rows: {move.X}, Cols: {move.Y}) is not valid at this time.";
                 return chessBoard;
             }
 
@@ -66,7 +68,8 @@ namespace engine
             if (blockingPiece != null)
             {
                 var blockingPiecePosition = chessBoard.GetPiecePosition(blockingPiece);
-                chessBoard.ErrorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) is blocked by another piece ({blockingPiece}) in position {blockingPiecePosition}.";
+                chessBoard.ErrorMessage =
+                    $"This move (Rows: {move.X}, Cols: {move.Y}) is blocked by another piece ({blockingPiece}) in position {blockingPiecePosition}.";
                 return chessBoard;
             }
 
@@ -77,11 +80,10 @@ namespace engine
                 return chessBoard;
             }
 
-
-            // if would leave in check
             if (WouldLeaveInCheck())
             {
-                chessBoard.ErrorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) would leave the current player in check.";
+                chessBoard.ErrorMessage =
+                    $"This move (Rows: {move.X}, Cols: {move.Y}) would leave the current player in check.";
                 return chessBoard;
             }
 
@@ -104,24 +106,37 @@ namespace engine
 
         private bool CanCastle(ChessBoard board, ChessPiece king, Move move)
         {
-            var kingRow = board.GetPiecePosition(king).Row;
-            var targetCastlePosition = move.X > 0 ? board.ChessPieces[kingRow, 7] : board.ChessPieces[kingRow, 0];
-            if (targetCastlePosition == null || targetCastlePosition.Type != "Castle" || targetCastlePosition.HasMoved)
+            var kingPosition = board.GetPiecePosition(king);
+            var targetCastlePosition = move.Y > 0
+                ? new Position {Row = kingPosition.Row, Column = 7}
+                : new Position {Row = kingPosition.Row, Column = 0};
+            var targetCastle = board.ChessPieces[kingPosition.Row, targetCastlePosition.Column];
+            
+            if (targetCastle == null || targetCastle.Type != "Rook" || targetCastle.HasMoved)
             {
                 return false;
             }
 
-//            if (IsBlocked())
-//            {
-//                return false;
-//            }
-//
+            if (CastlingIsBlocked(board, kingPosition, targetCastlePosition))
+            {
+                return false;
+            }
+
 //            if (IsInCheck())
 //            {
 //                return false;
 //            }
 
             return true;
+        }
+
+        private bool CastlingIsBlocked(ChessBoard board, Position kingPosition, Position castlePosition)
+        {
+            var columns = kingPosition.Column > castlePosition.Column
+                ? Enumerable.Range(castlePosition.Column + 1, kingPosition.Column - castlePosition.Column - 1)
+                : Enumerable.Range(kingPosition.Column + 1, castlePosition.Column - kingPosition.Column - 1);
+
+            return columns.Select(col => board.ChessPieces[kingPosition.Row, col]).Any(piece => piece != null);
         }
 
         private ChessPiece GetBlockingPiece()

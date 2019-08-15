@@ -10,7 +10,7 @@ namespace engine.Pieces
 
         protected ChessPiece()
         {
-            Id = new Guid();
+            Id = Guid.NewGuid();
             HasMoved = false;
         }
 

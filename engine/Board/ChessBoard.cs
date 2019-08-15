@@ -28,7 +28,7 @@ namespace engine.Board
             {
                 for (var col = 0; col < ChessPieces.GetLength(1); col++)
                 {
-                    if (ChessPieces[row, col].Id == piece.Id)
+                    if (ChessPieces[row, col]?.Id == piece.Id)
                     {
                         return new Position {Row = row, Column = col};
                     }
