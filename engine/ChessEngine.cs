@@ -56,7 +56,7 @@ namespace engine
                 return chessBoard;
             }
 
-            if (IsValidSpecialMove(pieceInSource, move) && !SpecialMoveIsPossible())
+            if (IsValidSpecialMove(pieceInSource, move) && !SpecialMoveIsPossible(chessBoard, pieceInSource, move))
             {
                 chessBoard.ErrorMessage = $"This special move (Rows: {move.X}, Cols: {move.Y}) is not valid at this time.";
                 return chessBoard;
@@ -89,9 +89,39 @@ namespace engine
             return new ChessBoard();
         }
 
-        private bool SpecialMoveIsPossible()
+        private bool SpecialMoveIsPossible(ChessBoard board, ChessPiece piece, Move move)
         {
-            throw new NotImplementedException();
+            switch (piece.Type)
+            {
+                case "Pawn":
+                    return !piece.HasMoved;
+                case "King":
+                    return !piece.HasMoved && CanCastle(board, piece, move);
+                default:
+                    throw new ArgumentException($"This piece ({piece}) does not have any special moves.");
+            }
+        }
+
+        private bool CanCastle(ChessBoard board, ChessPiece king, Move move)
+        {
+            var kingRow = board.GetPiecePosition(king).Row;
+            var targetCastlePosition = move.X > 0 ? board.ChessPieces[kingRow, 7] : board.ChessPieces[kingRow, 0];
+            if (targetCastlePosition == null || targetCastlePosition.Type != "Castle" || targetCastlePosition.HasMoved)
+            {
+                return false;
+            }
+
+//            if (IsBlocked())
+//            {
+//                return false;
+//            }
+//
+//            if (IsInCheck())
+//            {
+//                return false;
+//            }
+
+            return true;
         }
 
         private ChessPiece GetBlockingPiece()
@@ -160,8 +190,8 @@ namespace engine
 
         public Move(Position sourcePosition, Position targetPosition)
         {
-            X = targetPosition.Column - sourcePosition.Column;
-            Y = targetPosition.Row - sourcePosition.Row;
+            X = targetPosition.Row - sourcePosition.Row;
+            Y = targetPosition.Column - sourcePosition.Column;
         }
     }
 }

@@ -5,7 +5,16 @@ namespace engine.Pieces
 {
     public abstract class ChessPiece : IEquatable<ChessPiece>
     {
-        protected abstract string Type { get; set; }
+        public bool HasMoved;
+        public Guid Id;
+
+        protected ChessPiece()
+        {
+            Id = new Guid();
+            HasMoved = false;
+        }
+
+        protected internal abstract string Type { get; set; }
         protected internal abstract string Colour { get; set; }
         protected abstract string Symbol { get; set; }
         protected internal abstract List<(int x, int y)> NormalMoves { get; set; }
@@ -22,6 +31,11 @@ namespace engine.Pieces
         public override string ToString()
         {
             return $"{Colour} {Type}";
+        }
+
+        public void MarkAsMoved()
+        {
+            HasMoved = true;
         }
     }
 }

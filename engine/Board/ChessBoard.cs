@@ -24,8 +24,18 @@ namespace engine.Board
 
         public Position GetPiecePosition(ChessPiece piece)
         {
+            for (var row = 0; row < ChessPieces.GetLength(0); row++)
+            {
+                for (var col = 0; col < ChessPieces.GetLength(1); col++)
+                {
+                    if (ChessPieces[row, col].Id == piece.Id)
+                    {
+                        return new Position {Row = row, Column = col};
+                    }
+                }
+            }
             
-            return new Position();
+            throw new ArgumentException($"The piece ({piece}) is not on the board.");
         }
     }
 }
