@@ -44,22 +44,21 @@ namespace engine
                 return chessBoard;
             }
 
-            var x = targetPosition.Column - sourcePosition.Column;
-            var y = targetPosition.Row - sourcePosition.Row;
+            var move = new Move(sourcePosition, targetPosition);
             
-            if (!IsValidNormalMove(pieceInSource, x, y) &&
-                !IsValidSpecialMove(pieceInSource, x, y))
+            if (!IsValidNormalMove(pieceInSource, move) &&
+                !IsValidSpecialMove(pieceInSource, move))
             {
                 chessBoard.ErrorMessage =
-                    $"This move (Rows: {x}, Cols: {y}) is not valid for this piece ({pieceInSource}). " +
+                    $"This move (Rows: {move.X}, Cols: {move.Y}) is not valid for this piece ({pieceInSource}). " +
                     $"Valid normal moves are: {string.Join(", ", pieceInSource.NormalMoves)}. " +
                     $"Valid special moves are: {string.Join(", ", pieceInSource.SpecialMoves)}.";
                 return chessBoard;
             }
 
-            if (IsValidSpecialMove(pieceInSource, x, y) && !SpecialMoveIsPossible())
+            if (IsValidSpecialMove(pieceInSource, move) && !SpecialMoveIsPossible())
             {
-                chessBoard.ErrorMessage = $"This special move (Rows: {x}, Cols: {y}) is not valid at this time.";
+                chessBoard.ErrorMessage = $"This special move (Rows: {move.X}, Cols: {move.Y}) is not valid at this time.";
                 return chessBoard;
             }
 
@@ -67,7 +66,7 @@ namespace engine
             if (blockingPiece != null)
             {
                 var blockingPiecePosition = chessBoard.GetPiecePosition(blockingPiece);
-                chessBoard.ErrorMessage = $"This move (Rows: {x}, Cols: {y}) is blocked by another piece ({blockingPiece}) in position {blockingPiecePosition}.";
+                chessBoard.ErrorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) is blocked by another piece ({blockingPiece}) in position {blockingPiecePosition}.";
                 return chessBoard;
             }
 
@@ -82,7 +81,7 @@ namespace engine
             // if would leave in check
             if (WouldLeaveInCheck())
             {
-                chessBoard.ErrorMessage = $"This move (Rows: {x}, Cols: {y}) would leave the current player in check.";
+                chessBoard.ErrorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) would leave the current player in check.";
                 return chessBoard;
             }
 
@@ -105,9 +104,9 @@ namespace engine
             throw new NotImplementedException();
         }
 
-        private bool IsValidSpecialMove(ChessPiece pieceToMove, int x, int y)
+        private bool IsValidSpecialMove(ChessPiece pieceToMove, Move move)
         {
-            return pieceToMove.SpecialMoves.Contains((x, y));
+            return pieceToMove.SpecialMoves.Contains((move.X, move.Y));
         }
 
         private bool IsOccupiedBySameTeam(ChessPiece pieceInSource, ChessPiece pieceInTarget)
@@ -125,9 +124,9 @@ namespace engine
             return position.Row < 0 || position.Row > 7;
         }
 
-        private bool IsValidNormalMove(ChessPiece pieceToMove, int x, int y)
+        private bool IsValidNormalMove(ChessPiece pieceToMove, Move move)
         {
-            return pieceToMove.NormalMoves.Contains((x, y));
+            return pieceToMove.NormalMoves.Contains((move.X, move.Y));
         }
 
         public List<Position> GetValidPositions(ChessBoard chessGame, Position position)
@@ -151,6 +150,18 @@ namespace engine
         public override string ToString()
         {
             return $"Row: {Row}, Col: {Column}";
+        }
+    }
+
+    public class Move
+    {
+        public readonly int X;
+        public readonly int Y;
+
+        public Move(Position sourcePosition, Position targetPosition)
+        {
+            X = targetPosition.Column - sourcePosition.Column;
+            Y = targetPosition.Row - sourcePosition.Row;
         }
     }
 }
