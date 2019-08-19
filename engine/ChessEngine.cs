@@ -64,22 +64,12 @@ namespace engine
                 return chessBoard;
             }
 
-            var blockingPiece = GetBlockingPiece();
-            if (blockingPiece != null)
+            if (MoveIsBlocked(chessBoard, pieceInSource, pieceInTarget, move))
             {
-                var blockingPiecePosition = chessBoard.GetPiecePosition(blockingPiece);
-                chessBoard.ErrorMessage =
-                    $"This move (Rows: {move.X}, Cols: {move.Y}) is blocked by another piece ({blockingPiece}) in position {blockingPiecePosition}.";
+                chessBoard.ErrorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) is blocked by another piece.";
                 return chessBoard;
             }
-
-            if (IsOccupiedBySameTeam(pieceInSource, pieceInTarget))
-            {
-                chessBoard.ErrorMessage =
-                    $"The target position ({targetPosition}) is already occupied by a piece ({pieceInTarget}) from the same team";
-                return chessBoard;
-            }
-
+            
             if (WouldLeaveInCheck())
             {
                 chessBoard.ErrorMessage =
@@ -95,6 +85,7 @@ namespace engine
         {
             switch (piece.Type)
             {
+                // en passant?
                 case "Pawn":
                     return !piece.HasMoved;
                 case "King":
@@ -108,11 +99,11 @@ namespace engine
         {
             var kingPosition = board.GetPiecePosition(king);
             var targetCastlePosition = move.Y > 0
-                ? new Position {Row = kingPosition.Row, Column = 7}
-                : new Position {Row = kingPosition.Row, Column = 0};
-            var targetCastle = board.ChessPieces[kingPosition.Row, targetCastlePosition.Column];
-            
-            if (targetCastle == null || targetCastle.Type != "Rook" || targetCastle.HasMoved)
+                ? new Position(kingPosition.Row, 7)
+                : new Position(kingPosition.Row, 0);
+            var targetPositionPiece = board.ChessPieces[kingPosition.Row, targetCastlePosition.Column];
+
+            if (targetPositionPiece == null || targetPositionPiece.Type != "Rook" || targetPositionPiece.HasMoved)
             {
                 return false;
             }
@@ -122,7 +113,7 @@ namespace engine
                 return false;
             }
 
-//            if (IsInCheck())
+//            if (IsInCheck() || WouldLeaveInCheck())
 //            {
 //                return false;
 //            }
@@ -130,18 +121,15 @@ namespace engine
             return true;
         }
 
-        private bool CastlingIsBlocked(ChessBoard board, Position kingPosition, Position castlePosition)
-        {
-            var columns = kingPosition.Column > castlePosition.Column
-                ? Enumerable.Range(castlePosition.Column + 1, kingPosition.Column - castlePosition.Column - 1)
-                : Enumerable.Range(kingPosition.Column + 1, castlePosition.Column - kingPosition.Column - 1);
-
-            return columns.Select(col => board.ChessPieces[kingPosition.Row, col]).Any(piece => piece != null);
-        }
-
-        private ChessPiece GetBlockingPiece()
+        private bool IsInCheck()
         {
             throw new NotImplementedException();
+        }
+
+        private bool CastlingIsBlocked(ChessBoard board, Position kingPosition, Position castlePosition)
+        {
+            var colsToCheck = kingPosition.Column > castlePosition.Column ? new List<int> {1, 2, 3} : new List<int> {5, 6};
+            return colsToCheck.Select(col => board.ChessPieces[kingPosition.Row, col]).Any(piece => piece != null);
         }
 
         private bool WouldLeaveInCheck()
@@ -154,14 +142,31 @@ namespace engine
             return pieceToMove.SpecialMoves.Contains((move.X, move.Y));
         }
 
-        private bool IsOccupiedBySameTeam(ChessPiece pieceInSource, ChessPiece pieceInTarget)
+        private bool MoveIsBlocked(ChessBoard board, ChessPiece pieceInSource, ChessPiece pieceInTarget, Move move)
         {
-            if (pieceInTarget == null)
+            if (pieceInSource.Colour == pieceInTarget?.Colour)
+            {
+                return true;
+            }
+            
+            if (pieceInSource.Type == "Pawn" && move.Y == 0)
+            {
+                return pieceInTarget != null;
+            }
+
+            if (pieceInSource.Type == "Knight")
             {
                 return false;
             }
 
-            return pieceInSource.Colour == pieceInTarget.Colour;
+            var sourcePosition = board.GetPiecePosition(pieceInSource);
+            var targetPosition = board.GetPiecePosition(pieceInTarget);
+            if (sourcePosition.GetPositions(targetPosition).Any(p => p != null))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private bool PositionIsOffTheBoard(Position position)
@@ -185,6 +190,12 @@ namespace engine
         public int Row;
         public int Column;
 
+        public Position(int row, int column)
+        {
+            Row = row;
+            Column = column;
+        }
+
         public bool Equals(Position other)
         {
             if (ReferenceEquals(null, other)) return false;
@@ -195,6 +206,68 @@ namespace engine
         public override string ToString()
         {
             return $"Row: {Row}, Col: {Column}";
+        }
+
+        public List<Position> GetPositions(Position position)
+        {
+            if (Row == position.Row && Column == position.Column)
+            {
+                return new List<Position>();
+            }
+
+            if (Row == position.Row)
+            {
+                var positions = new List<Position>();
+                var colsToTraverse = position.Column - Column;
+
+                if (colsToTraverse < 0)
+                {
+                    for (var i = -1; i > colsToTraverse; i--)
+                    {
+                        positions.Add(new Position(Row, Column + i));
+                    }
+                }
+                else
+                {
+                    for (var i = 1; i < colsToTraverse; i++)
+                    {
+                        positions.Add(new Position(Row, Column + i));
+                    }
+                }
+
+                return positions;
+            }
+            
+            
+            if (Column == position.Column)
+            {
+                var positions = new List<Position>();
+                var rowsToTraverse = position.Row - Row;
+
+                if (rowsToTraverse < 0)
+                {
+                    for (var i = -1; i > rowsToTraverse; i--)
+                    {
+                        positions.Add(new Position(Row + i, Column));
+                    }
+                }
+                else
+                {
+                    for (var i = 1; i < rowsToTraverse; i++)
+                    {
+                        positions.Add(new Position(Row + 1, Column));
+                    }
+                }
+
+                return positions;
+            }
+            
+            // row + col +
+            // row - col +
+            // row + col -
+            // row - col -
+
+            return new List<Position>();
         }
     }
 

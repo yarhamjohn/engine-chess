@@ -30,7 +30,7 @@ namespace engine.Board
                 {
                     if (ChessPieces[row, col]?.Id == piece.Id)
                     {
-                        return new Position {Row = row, Column = col};
+                        return new Position(row, col);
                     }
                 }
             }
