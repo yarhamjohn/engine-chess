@@ -39,7 +39,7 @@ namespace engine_tests
         public void GetPiece_ReturnsExactPiece()
         {
             var board = new ChessBoard();
-            var pawn = new Pawn("black");
+            var pawn = new Pawn(Player.Black);
             var position = new Position( 0, 0);
             board.SetPosition(position, pawn);
             
@@ -52,7 +52,7 @@ namespace engine_tests
         public void SetPosition_CorrectlyReplacesNull()
         {
             var board = new ChessBoard();
-            var pawn = new Pawn("black");
+            var pawn = new Pawn(Player.Black);
             var position = new Position(0, 0);
 
             board.SetPosition(position, pawn);
@@ -65,8 +65,8 @@ namespace engine_tests
         public void SetPosition_CorrectlyReplacesExistingPiece()
         {
             var board = new ChessBoard();
-            var pawn = new Pawn("black");
-            var king = new King("black");
+            var pawn = new Pawn(Player.Black);
+            var king = new King(Player.Black);
             var position = new Position(0, 0);
 
             board.SetPosition(position, pawn);
@@ -80,22 +80,22 @@ namespace engine_tests
         public void GetBoard_ReturnsCorrectBoard()
         {
             var board = new ChessBoard();
-            var pawn = new Pawn("black");
-            var king = new King("black");
+            var pawn = new Pawn(Player.Black);
+            var king = new King(Player.Black);
 
             board.SetPosition(new Position(0, 0), pawn);
             board.SetPosition(new Position(7, 7), king);
             
             var expectedBoard = new ChessPiece[,]
             {
-                {new Pawn("black"), null, null, null, null, null, null, null},
+                {new Pawn(Player.Black), null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, new King("black") }
+                {null, null, null, null, null, null, null, new King(Player.Black) }
             };
             Assert.That(board.GetBoard(), Is.EqualTo(expectedBoard));
         }
@@ -104,7 +104,7 @@ namespace engine_tests
         public void GetPosition_ReturnsNull_GivenNull()
         {
             var board = new ChessBoard();
-            board.SetPosition(new Position(0, 0), new Pawn("black"));
+            board.SetPosition(new Position(0, 0), new Pawn(Player.Black));
             
             var position = board.GetPosition(null);
 
@@ -115,7 +115,7 @@ namespace engine_tests
         public void GetPosition_ReturnsCorrectPosition_GivenPieceOnBoard()
         {
             var board = new ChessBoard();
-            var pawn = new Pawn("black");
+            var pawn = new Pawn(Player.Black);
             var expectedPosition = new Position(0, 0);
             board.SetPosition(expectedPosition, pawn);
             
@@ -128,11 +128,11 @@ namespace engine_tests
         public void GetPosition_ReturnsNull_GivenPieceNotOnTheBoard()
         {
             var board = new ChessBoard();
-            var pawn = new Pawn("black");
+            var pawn = new Pawn(Player.Black);
             var expectedPosition = new Position(0, 0);
             board.SetPosition(expectedPosition, pawn);
             
-            var actualPosition = board.GetPosition(new King("black"));
+            var actualPosition = board.GetPosition(new King(Player.Black));
 
             Assert.That(actualPosition, Is.Null);
         }        
@@ -162,7 +162,7 @@ namespace engine_tests
         {
             var boardOne = new ChessBoard();
             var boardTwo = new ChessBoard();
-            boardTwo.SetPosition(new Position(0, 0), new Pawn("black"));
+            boardTwo.SetPosition(new Position(0, 0), new Pawn(Player.Black));
             
             var result = boardOne.Equals(boardTwo);
             
@@ -173,9 +173,9 @@ namespace engine_tests
         public void EqualsReturnsTrue_GivenAMatchingBoard()
         {
             var boardOne = new ChessBoard();
-            boardOne.SetPosition(new Position(0, 0), new Pawn("black"));
+            boardOne.SetPosition(new Position(0, 0), new Pawn(Player.Black));
             var boardTwo = new ChessBoard();
-            boardTwo.SetPosition(new Position(0, 0), new Pawn("black"));
+            boardTwo.SetPosition(new Position(0, 0), new Pawn(Player.Black));
 
             var result = boardOne.Equals(boardTwo);
             

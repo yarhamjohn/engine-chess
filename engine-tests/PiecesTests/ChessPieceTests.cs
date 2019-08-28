@@ -1,4 +1,5 @@
-﻿using engine.Pieces;
+﻿using engine.Game;
+using engine.Pieces;
 using NUnit.Framework;
 
 namespace engine_tests.PiecesTests
@@ -9,7 +10,7 @@ namespace engine_tests.PiecesTests
         [Test]
         public void Equals_ReturnsFalse_GivenNull()
         {
-            var pieceOne = new Pawn("black");
+            var pieceOne = new Pawn(Player.Black);
 
             var result = pieceOne.Equals(null);
             
@@ -19,7 +20,7 @@ namespace engine_tests.PiecesTests
         [Test]
         public void Equals_ReturnsTrue_GivenItself()
         {
-            var piece = new Pawn("black");
+            var piece = new Pawn(Player.Black);
 
             var result = piece.Equals(piece);
             
@@ -29,8 +30,8 @@ namespace engine_tests.PiecesTests
         [Test]
         public void Equals_ReturnsFalse_GivenADifferentPieceType()
         {
-            var pieceOne = new Pawn("black");
-            var pieceTwo = new King("black");
+            var pieceOne = new Pawn(Player.Black);
+            var pieceTwo = new King(Player.Black);
 
             var result = pieceOne.Equals(pieceTwo);
             
@@ -40,8 +41,8 @@ namespace engine_tests.PiecesTests
         [Test]
         public void Equals_ReturnsFalse_GivenADifferentPieceColour()
         {
-            var pieceOne = new Pawn("black");
-            var pieceTwo = new Pawn("white");
+            var pieceOne = new Pawn(Player.Black);
+            var pieceTwo = new Pawn(Player.White);
 
             var result = pieceOne.Equals(pieceTwo);
             
@@ -51,8 +52,8 @@ namespace engine_tests.PiecesTests
         [Test]
         public void Equals_ReturnsTrue_GivenSamePieceTypeAndColour()
         {
-            var pieceOne = new Pawn("black");
-            var pieceTwo = new Pawn("black");
+            var pieceOne = new Pawn(Player.Black);
+            var pieceTwo = new Pawn(Player.Black);
 
             var result = pieceOne.Equals(pieceTwo);
             
@@ -62,17 +63,17 @@ namespace engine_tests.PiecesTests
         [Test]
         public void ToString_ReturnsCorrectStringRepresentation()
         {
-            var piece = new Pawn("black");
+            var piece = new Pawn(Player.Black);
 
             var expected = piece.ToString();
             
-            Assert.That(expected, Is.EqualTo("black Pawn"));
+            Assert.That(expected, Is.EqualTo("Black Pawn"));
         }
 
         [Test]
         public void MarkAsMoved_CorrectlyMarksPiece()
         {
-            var piece = new Pawn("black");
+            var piece = new Pawn(Player.Black);
             Assert.That(piece.HasMoved, Is.False);
             
             piece.MarkAsMoved();

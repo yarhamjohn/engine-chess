@@ -9,8 +9,6 @@ namespace engine_tests
     [TestFixture]
     public class ChessEngineTests
     {
-        private const string Black = "black";
-        private const string White = "white";
         private ChessBoard _emptyChessBoard;
 
         [SetUp]
@@ -79,11 +77,11 @@ namespace engine_tests
             var startingPosition = new Position(0, 0);
             var targetPosition = new Position(7, 7);
 
-            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn(Player.Black));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-                    "This move (Rows: 7, Cols: 7) is not valid for this piece (black Pawn)."),
+                    "This move (Rows: 7, Cols: 7) is not valid for this piece (Black Pawn)."),
                 () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
 
@@ -94,12 +92,12 @@ namespace engine_tests
             var startingPosition = new Position(0, 0);
             var targetPosition = new Position(2, 0);
 
-            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn(Player.Black));
             _emptyChessBoard.GetPiece(startingPosition).MarkAsMoved();
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-                    "This move (Rows: 2, Cols: 0) is not valid for this piece (black Pawn)."),
+                    "This move (Rows: 2, Cols: 0) is not valid for this piece (Black Pawn)."),
                 () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
 
@@ -114,13 +112,13 @@ namespace engine_tests
             var blockingPosition = new Position(0, col);
             var rookPosition = new Position(0, 0);
 
-            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
-            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
-            _emptyChessBoard.SetPosition(blockingPosition, new Bishop("White"));
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King(Player.Black));
+            _emptyChessBoard.SetPosition(rookPosition, new Rook(Player.Black));
+            _emptyChessBoard.SetPosition(blockingPosition, new Bishop(Player.White));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
                 () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
 //        
@@ -133,13 +131,13 @@ namespace engine_tests
 //            var attackingPosition= new Position(7, 3);
 //            var rookPosition = new Position(0, 0);
 //
-//            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
-//            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
-//            _emptyChessBoard.SetPosition(attackingPosition, new Queen("White"));
+//            _emptyChessBoard.SetPosition(kingStartingPosition, new King(Players.Black));
+//            _emptyChessBoard.SetPosition(rookPosition, new Rook(Players.Black));
+//            _emptyChessBoard.SetPosition(attackingPosition, new Queen(Players.White));
 //
 //            Assert.Throws(
 //                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-//                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+//                    "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
 //                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
 //        }
         
@@ -151,13 +149,13 @@ namespace engine_tests
             var kingTargetPosition = new Position(0, 2);
             var rookPosition = new Position(0, 0);
 
-            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
-            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King(Player.Black));
+            _emptyChessBoard.SetPosition(rookPosition, new Rook(Player.Black));
             _emptyChessBoard.GetPiece(kingStartingPosition).MarkAsMoved();
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
                 () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
 
@@ -169,13 +167,13 @@ namespace engine_tests
             var kingTargetPosition = new Position(0, 2);
             var rookPosition = new Position(0, 0);
 
-            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
-            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King(Player.Black));
+            _emptyChessBoard.SetPosition(rookPosition, new Rook(Player.Black));
             _emptyChessBoard.GetPiece(rookPosition).MarkAsMoved();
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
                 () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
 
@@ -186,11 +184,11 @@ namespace engine_tests
             var kingStartingPosition = new Position(0, 4);
             var kingTargetPosition = new Position(0, 2);
 
-            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King(Player.Black));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
                 () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
 
@@ -202,12 +200,12 @@ namespace engine_tests
             var kingTargetPosition = new Position(0, 2);
             var rookPosition = new Position(0, 0);
 
-            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
-            _emptyChessBoard.SetPosition(rookPosition, new Queen("black"));
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King(Player.Black));
+            _emptyChessBoard.SetPosition(rookPosition, new Queen(Player.Black));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
-                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
                 () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
 
@@ -218,8 +216,8 @@ namespace engine_tests
             var startingPosition = new Position(0, 0);
             var targetPosition = new Position(1, 0);
 
-            _emptyChessBoard.SetPosition(startingPosition, new Rook("black"));
-            _emptyChessBoard.SetPosition(targetPosition, new Pawn("black"));
+            _emptyChessBoard.SetPosition(startingPosition, new Rook(Player.Black));
+            _emptyChessBoard.SetPosition(targetPosition, new Pawn(Player.Black));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
@@ -234,8 +232,8 @@ namespace engine_tests
             var startingPosition = new Position(0, 0);
             var targetPosition = new Position(1, 0);
 
-            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
-            _emptyChessBoard.SetPosition(targetPosition, new Bishop("white"));
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn(Player.Black));
+            _emptyChessBoard.SetPosition(targetPosition, new Bishop(Player.White));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
@@ -250,8 +248,8 @@ namespace engine_tests
             var startingPosition = new Position(0, 0);
             var targetPosition = new Position(2, 0);
 
-            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
-            _emptyChessBoard.SetPosition(targetPosition, new Bishop("white"));
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn(Player.Black));
+            _emptyChessBoard.SetPosition(targetPosition, new Bishop(Player.White));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
@@ -267,9 +265,9 @@ namespace engine_tests
             var targetPosition = new Position(2, 0);
             var blockingPosition = new Position(1, 0);
 
-            _emptyChessBoard.SetPosition(startingPosition, new Rook("black"));
-            _emptyChessBoard.SetPosition(targetPosition, new Queen("white"));
-            _emptyChessBoard.SetPosition(blockingPosition, new Knight("black"));
+            _emptyChessBoard.SetPosition(startingPosition, new Rook(Player.Black));
+            _emptyChessBoard.SetPosition(targetPosition, new Queen(Player.White));
+            _emptyChessBoard.SetPosition(blockingPosition, new Knight(Player.Black));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
@@ -285,9 +283,9 @@ namespace engine_tests
             var targetPosition = new Position(2, 0);
             var blockingPosition = new Position(1, 0);
 
-            _emptyChessBoard.SetPosition(startingPosition, new Rook("black"));
-            _emptyChessBoard.SetPosition(targetPosition, new Queen("white"));
-            _emptyChessBoard.SetPosition(blockingPosition, new Knight("white"));
+            _emptyChessBoard.SetPosition(startingPosition, new Rook(Player.Black));
+            _emptyChessBoard.SetPosition(targetPosition, new Queen(Player.White));
+            _emptyChessBoard.SetPosition(blockingPosition, new Knight(Player.White));
 
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(

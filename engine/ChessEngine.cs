@@ -15,7 +15,7 @@ namespace engine
             return new ChessGame
             {
                 Board = builder.Build().GetBoard(),
-                ActivePlayer = "white",
+                ActivePlayer = Player.White,
                 GameState = ""
             };
         }
@@ -76,7 +76,7 @@ namespace engine
             return new ChessGame
             {
                 Board = new ChessBoard().GetBoard(),
-                ActivePlayer = "white",
+                ActivePlayer = Player.White,
                 GameState = ""
             };
         }

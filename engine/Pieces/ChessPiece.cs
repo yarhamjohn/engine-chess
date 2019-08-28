@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using engine.Game;
 
 namespace engine.Pieces
 {
@@ -9,7 +10,7 @@ namespace engine.Pieces
         public Guid Id;
 
         protected internal abstract string Type { get; set; }
-        protected internal abstract string Colour { get; set; }
+        protected internal abstract Player Colour { get; set; }
         protected abstract string Symbol { get; set; }
         protected internal abstract List<(int x, int y)> NormalMoves { get; set; }
         protected internal abstract List<(int x, int y)> SpecialMoves { get; set; }
