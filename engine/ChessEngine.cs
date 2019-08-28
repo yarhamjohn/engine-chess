@@ -2,284 +2,88 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
-using engine.Board;
+using engine.Game;
 using engine.Pieces;
 
 namespace engine
 {
     public class ChessEngine
     {
-        public ChessBoard GetNewChessBoard()
+        public ChessGame GetNewChessGame()
         {
             var builder = new ChessBoardBuilder();
-            return builder.Build();
+            return new ChessGame
+            {
+                Board = builder.Build().GetBoard(),
+                ActivePlayer = "white",
+                GameState = ""
+            };
         }
 
-        public ChessBoard MoveChessPiece(ChessBoard chessBoard, Position sourcePosition, Position targetPosition)
+        public ChessGame MoveChessPiece(ChessBoard chessBoard, Position startPosition, Position targetPosition)
         {
-            if (PositionIsOffTheBoard(sourcePosition))
+            if (!chessBoard.IsValidPosition(startPosition))
             {
-                chessBoard.ErrorMessage = $"The starting position ({sourcePosition}) is not on the board";
-                return chessBoard;
+                var errorMessage = $"The starting position ({startPosition}) is not on the board";
+                throw new InvalidOperationException(errorMessage);
             }
 
-            if (PositionIsOffTheBoard(targetPosition))
+            if (!chessBoard.IsValidPosition(targetPosition))
             {
-                chessBoard.ErrorMessage = $"The targetPosition ({targetPosition}) is not on the board";
-                return chessBoard;
+                var errorMessage = $"The target position ({targetPosition}) is not on the board";
+                throw new InvalidOperationException(errorMessage);
             }
 
-            if (sourcePosition.Equals(targetPosition))
+            if (startPosition.Equals(targetPosition))
             {
-                chessBoard.ErrorMessage =
-                    $"The starting position ({sourcePosition}) was the same as the target position ({targetPosition})";
-                return chessBoard;
+                var errorMessage = $"The starting position ({startPosition}) was the same as the target position ({targetPosition})";
+                throw new InvalidOperationException(errorMessage);
             }
 
-            var pieceInSource = chessBoard.ChessPieces[sourcePosition.Row, sourcePosition.Column];
-            var pieceInTarget = chessBoard.ChessPieces[targetPosition.Row, targetPosition.Column];
+            var pieceInSource = chessBoard.GetPiece(startPosition);
+            var pieceInTarget = chessBoard.GetPiece(targetPosition);
 
             if (pieceInSource == null)
             {
-                chessBoard.ErrorMessage = $"There is no piece in the starting position ({sourcePosition})";
-                return chessBoard;
+                var errorMessage = $"There is no piece in the starting position ({startPosition})";
+                throw new InvalidOperationException(errorMessage);
             }
 
-            var move = new Move(sourcePosition, targetPosition);
+            var moveChecker = new MoveChecker();
+            var move = new Move(startPosition, targetPosition);
 
-            if (!IsValidNormalMove(pieceInSource, move) &&
-                !IsValidSpecialMove(pieceInSource, move))
+            if (!moveChecker.IsValidMovement(chessBoard, pieceInSource, move))
             {
-                chessBoard.ErrorMessage =
-                    $"This move (Rows: {move.X}, Cols: {move.Y}) is not valid for this piece ({pieceInSource}). " +
-                    $"Valid normal moves are: {string.Join(", ", pieceInSource.NormalMoves)}. " +
-                    $"Valid special moves are: {string.Join(", ", pieceInSource.SpecialMoves)}.";
-                return chessBoard;
+                var errorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) is not valid for this piece ({pieceInSource}).";
+                throw new InvalidOperationException(errorMessage);
             }
 
-            if (IsValidSpecialMove(pieceInSource, move) && !SpecialMoveIsPossible(chessBoard, pieceInSource, move))
+            if (moveChecker.MoveIsBlocked(chessBoard, pieceInSource, pieceInTarget, targetPosition, move))
             {
-                chessBoard.ErrorMessage =
-                    $"This special move (Rows: {move.X}, Cols: {move.Y}) is not valid at this time.";
-                return chessBoard;
-            }
-
-            if (MoveIsBlocked(chessBoard, pieceInSource, pieceInTarget, move))
-            {
-                chessBoard.ErrorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) is blocked by another piece.";
-                return chessBoard;
+                var errorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) is blocked by another piece.";
+                throw new InvalidOperationException(errorMessage);
             }
             
-            if (WouldLeaveInCheck())
+            if (moveChecker.WouldLeaveInCheck())
             {
-                chessBoard.ErrorMessage =
-                    $"This move (Rows: {move.X}, Cols: {move.Y}) would leave the current player in check.";
-                return chessBoard;
+                var errorMessage = $"This move (Rows: {move.X}, Cols: {move.Y}) would leave the current player in check.";
+                throw new InvalidOperationException(errorMessage);
             }
 
             // make move (inc removal of pieces)
-            return new ChessBoard();
-        }
-
-        private bool SpecialMoveIsPossible(ChessBoard board, ChessPiece piece, Move move)
-        {
-            switch (piece.Type)
-            {
-                // en passant?
-                case "Pawn":
-                    return !piece.HasMoved;
-                case "King":
-                    return !piece.HasMoved && CanCastle(board, piece, move);
-                default:
-                    throw new ArgumentException($"This piece ({piece}) does not have any special moves.");
-            }
-        }
-
-        private bool CanCastle(ChessBoard board, ChessPiece king, Move move)
-        {
-            var kingPosition = board.GetPiecePosition(king);
-            var targetCastlePosition = move.Y > 0
-                ? new Position(kingPosition.Row, 7)
-                : new Position(kingPosition.Row, 0);
-            var targetPositionPiece = board.ChessPieces[kingPosition.Row, targetCastlePosition.Column];
-
-            if (targetPositionPiece == null || targetPositionPiece.Type != "Rook" || targetPositionPiece.HasMoved)
-            {
-                return false;
-            }
-
-            if (CastlingIsBlocked(board, kingPosition, targetCastlePosition))
-            {
-                return false;
-            }
-
-//            if (IsInCheck() || WouldLeaveInCheck())
-//            {
-//                return false;
-//            }
-
-            return true;
-        }
-
-        private bool IsInCheck()
-        {
-            throw new NotImplementedException();
-        }
-
-        private bool CastlingIsBlocked(ChessBoard board, Position kingPosition, Position castlePosition)
-        {
-            var colsToCheck = kingPosition.Column > castlePosition.Column ? new List<int> {1, 2, 3} : new List<int> {5, 6};
-            return colsToCheck.Select(col => board.ChessPieces[kingPosition.Row, col]).Any(piece => piece != null);
-        }
-
-        private bool WouldLeaveInCheck()
-        {
-            throw new NotImplementedException();
-        }
-
-        private bool IsValidSpecialMove(ChessPiece pieceToMove, Move move)
-        {
-            return pieceToMove.SpecialMoves.Contains((move.X, move.Y));
-        }
-
-        private bool MoveIsBlocked(ChessBoard board, ChessPiece pieceInSource, ChessPiece pieceInTarget, Move move)
-        {
-            if (pieceInSource.Colour == pieceInTarget?.Colour)
-            {
-                return true;
-            }
             
-            if (pieceInSource.Type == "Pawn" && move.Y == 0)
+            // return updated board
+            return new ChessGame
             {
-                return pieceInTarget != null;
-            }
-
-            if (pieceInSource.Type == "Knight")
-            {
-                return false;
-            }
-
-            var sourcePosition = board.GetPiecePosition(pieceInSource);
-            var targetPosition = board.GetPiecePosition(pieceInTarget);
-            if (sourcePosition.GetPositions(targetPosition).Any(p => p != null))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool PositionIsOffTheBoard(Position position)
-        {
-            return position.Row < 0 || position.Row > 7;
-        }
-
-        private bool IsValidNormalMove(ChessPiece pieceToMove, Move move)
-        {
-            return pieceToMove.NormalMoves.Contains((move.X, move.Y));
+                Board = new ChessBoard().GetBoard(),
+                ActivePlayer = "white",
+                GameState = ""
+            };
         }
 
         public List<Position> GetValidPositions(ChessBoard chessGame, Position position)
         {
             return new List<Position>();
-        }
-    }
-
-    public class Position : IEquatable<Position>
-    {
-        public int Row;
-        public int Column;
-
-        public Position(int row, int column)
-        {
-            Row = row;
-            Column = column;
-        }
-
-        public bool Equals(Position other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Row == other.Row && Column == other.Column;
-        }
-
-        public override string ToString()
-        {
-            return $"Row: {Row}, Col: {Column}";
-        }
-
-        public List<Position> GetPositions(Position position)
-        {
-            if (Row == position.Row && Column == position.Column)
-            {
-                return new List<Position>();
-            }
-
-            if (Row == position.Row)
-            {
-                var positions = new List<Position>();
-                var colsToTraverse = position.Column - Column;
-
-                if (colsToTraverse < 0)
-                {
-                    for (var i = -1; i > colsToTraverse; i--)
-                    {
-                        positions.Add(new Position(Row, Column + i));
-                    }
-                }
-                else
-                {
-                    for (var i = 1; i < colsToTraverse; i++)
-                    {
-                        positions.Add(new Position(Row, Column + i));
-                    }
-                }
-
-                return positions;
-            }
-            
-            
-            if (Column == position.Column)
-            {
-                var positions = new List<Position>();
-                var rowsToTraverse = position.Row - Row;
-
-                if (rowsToTraverse < 0)
-                {
-                    for (var i = -1; i > rowsToTraverse; i--)
-                    {
-                        positions.Add(new Position(Row + i, Column));
-                    }
-                }
-                else
-                {
-                    for (var i = 1; i < rowsToTraverse; i++)
-                    {
-                        positions.Add(new Position(Row + 1, Column));
-                    }
-                }
-
-                return positions;
-            }
-            
-            // row + col +
-            // row - col +
-            // row + col -
-            // row - col -
-
-            return new List<Position>();
-        }
-    }
-
-    public class Move
-    {
-        public readonly int X;
-        public readonly int Y;
-
-        public Move(Position sourcePosition, Position targetPosition)
-        {
-            X = targetPosition.Row - sourcePosition.Row;
-            Y = targetPosition.Column - sourcePosition.Column;
         }
     }
 }

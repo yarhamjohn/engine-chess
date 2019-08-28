@@ -1,5 +1,6 @@
+using System;
 using engine;
-using engine.Board;
+using engine.Game;
 using engine.Pieces;
 using NUnit.Framework;
 
@@ -9,290 +10,288 @@ namespace engine_tests
     {
         private const string Black = "black";
         private const string White = "white";
-        private ChessBoard _startingChessBoard;
-        private ChessBoard _castlingChessBoard;
+        private ChessBoard _emptyChessBoard;
 
         [SetUp]
         public void Setup()
         {
-            _startingChessBoard = new ChessBoard
-            {
-                ChessPieces = new ChessPiece[,]
-                {
-                    {new Rook(Black), new Knight(Black), new Bishop(Black), new Queen(Black), new King(Black), new Bishop(Black), new Knight(Black), new Rook(Black)},
-                    {new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black)},
-                    {null, null, null, null, null, null, null, null},
-                    {null, null, null, null, null, null, null, null},
-                    {null, null, null, null, null, null, null, null},
-                    {null, null, null, null, null, null, null, null},
-                    {new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White)},
-                    {new Rook(White), new Knight(White), new Bishop(White), new Queen(White), new King(White), new Bishop(White), new Knight(White), new Rook(White)}
-                },
-                ErrorMessage = null
-            };
-            
-            _castlingChessBoard = new ChessBoard
-            {
-                ChessPieces = new ChessPiece[,]
-                {
-                    {new Rook(Black), null, null, null, new King(Black), null, null, new Rook(Black)},
-                    {new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black), new Pawn(Black)},
-                    {null, null, null, null, null, null, null, null},
-                    {null, null, null, null, null, null, null, null},
-                    {null, null, null, null, null, null, null, null},
-                    {null, null, null, null, null, null, null, null},
-                    {new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White), new Pawn(White)},
-                    {new Rook(White), new Knight(White), new Bishop(White), new Queen(White), new King(White), new Bishop(White), new Knight(White), new Rook(White)}
-                },
-                ErrorMessage = null
-            };
+            _emptyChessBoard = new ChessBoard();
         }
-        
-        
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_GivenSameStartingAndTargetPositions()
-        {
-            var engine = new ChessEngine();
-            var startingPosition = new Position(1, 0);
-            var targetPosition = new Position(1, 0);
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
 
-            Assert.AreEqual("The starting position (Row: 1, Col: 0) was the same as the target position (Row: 1, Col: 0)", newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
-        }
-        
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfStartingPositionIsOffTheBoard()
-        {
-            var engine = new ChessEngine();
-            var startingPosition = new Position(8, -1);
-            var targetPosition = new Position(0, 0);
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
-
-            Assert.AreEqual("The starting position (Row: 8, Col: -1) is not on the board", newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
-        }
-        
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfTargetPositionIsOffTheBoard()
+        public void MoveChessPieceThrows_GivenMatchingStartAndTargetPositions()
         {
             var engine = new ChessEngine();
             var startingPosition = new Position(0, 0);
-            var targetPosition = new Position(-1, 8);
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
+            var targetPosition = new Position(0, 0);
 
-            Assert.AreEqual("The targetPosition (Row: -1, Col: 8) is not on the board", newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
-        }   
-        
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "The starting position (Row: 0, Col: 0) was the same as the target position (Row: 0, Col: 0)"),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+        }
+
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfNoPieceInSourcePosition()
+        public void MoveChessPieceThrows_GivenStartPositionOffTheBoard()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(2, 0);
-            var targetPosition = new Position(3, 0);
             
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
+            var startingPosition = new Position(0, 8);
+            var targetPosition = new Position(0, 0);
 
-            Assert.AreEqual("There is no piece in the starting position (Row: 2, Col: 0)", newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "The starting position (Row: 0, Col: 8) is not on the board"),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
 
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsNotAValidNormalMoveOrSpecialMove()
+        public void MoveChessPieceThrows_GivenTargetPositionOffTheBoard()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(1, 0);
-            var targetPosition = new Position(4, 0);
-            
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(-1, 0);
 
-            const string expectedErrorMessage = "This move (Rows: 3, Cols: 0) is not valid for this piece (black Pawn). " +
-                                                "Valid normal moves are: (1, 0), (1, 1), (1, -1). " +
-                                                "Valid special moves are: (2, 0).";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "The target position (Row: -1, Col: 0) is not on the board"),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
 
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidPawnTwoPlaceMove_ButThePawnHasAlreadyMoved()
+        public void MoveChessPieceThrows_GivenNoPieceInStartPosition()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(1, 0);
-            var targetPosition = new Position(3, 0);
-            
-            _startingChessBoard.ChessPieces[startingPosition.Row, startingPosition.Column].MarkAsMoved();
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(1, 0);
 
-            const string expectedErrorMessage = "This special move (Rows: 2, Cols: 0) is not valid at this time.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "There is no piece in the starting position (Row: 0, Col: 0)"),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
-        
+
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheMoveIsBlocked()
+        public void MoveChessPieceThrows_GivenInvalidMovement()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(0, 4);
-            var targetPosition = new Position(0, 6);
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(7, 7);
 
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
 
-            const string expectedErrorMessage = "This special move (Rows: 0, Cols: 2) is not valid at this time.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 7, Cols: 7) is not valid for this piece (black Pawn)."),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
-        
+
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheKingHasAlreadyMoved()
+        public void MoveChessPieceThrows_GivenPawnSpecialMove_WhenPawnHasAlreadyMoved()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(0, 4);
-            var targetPosition = new Position(0, 2);
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(2, 0);
 
-            _castlingChessBoard.ChessPieces[startingPosition.Row, startingPosition.Column].MarkAsMoved();
-            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
+            _emptyChessBoard.GetPiece(startingPosition).MarkAsMoved();
 
-            const string expectedErrorMessage = "This special move (Rows: 0, Cols: -2) is not valid at this time.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_castlingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 2, Cols: 0) is not valid for this piece (black Pawn)."),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
-        
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButTheRookHasAlreadyMoved()
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void MoveChessPieceThrows_GivenCastlingMove_WhenMoveIsBlocked(int col)
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(0, 4);
-            var targetPosition = new Position(0, 6);
-            var rookPosition = new Position(0, 7);
-            
-            _castlingChessBoard.ChessPieces[rookPosition.Row, rookPosition.Column].MarkAsMoved();
-            
-            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
-
-            const string expectedErrorMessage = "This special move (Rows: 0, Cols: 2) is not valid at this time.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_castlingChessBoard, newChessBoard);
-        }
-        
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButThereIsNoPieceInTheRookPosition()
-        {
-            var engine = new ChessEngine();
-            var startingPosition = new Position(0, 4);
-            var targetPosition = new Position(0, 6);
-            var rookPosition = new Position(0, 7);
-
-            _castlingChessBoard.ChessPieces[rookPosition.Row, rookPosition.Column] = null;
-            
-            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
-
-            const string expectedErrorMessage = "This special move (Rows: 0, Cols: 2) is not valid at this time.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_castlingChessBoard, newChessBoard);
-        }
-        
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfMoveIsAValidCastlingMove_ButThereIsADifferentPieceInTheRookPosition()
-        {
-            var engine = new ChessEngine();
-            var startingPosition = new Position(0, 4);
-            var targetPosition = new Position(0, 2);
+            var kingStartingPosition = new Position(0, 4);
+            var kingTargetPosition = new Position(0, 2);
+            var blockingPosition = new Position(0, col);
             var rookPosition = new Position(0, 0);
 
-            _castlingChessBoard.ChessPieces[rookPosition.Row, rookPosition.Column] = new Queen("black");
-            
-            var newChessBoard = engine.MoveChessPiece(_castlingChessBoard, startingPosition, targetPosition);
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
+            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
+            _emptyChessBoard.SetPosition(blockingPosition, new Bishop("White"));
 
-            const string expectedErrorMessage = "This special move (Rows: 0, Cols: -2) is not valid at this time.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_castlingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
-
-        [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfTargetPositionContainsPieceFromTheSameTeam()
-        {
-            var engine = new ChessEngine();
-            var startingPosition = new Position(0, 1);
-            var targetPosition = new Position(2, 2);
-            
-            _startingChessBoard.ChessPieces[targetPosition.Row, targetPosition.Column] = new Pawn("black");
-
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
-
-            const string expectedErrorMessage = "This move (Rows: 2, Cols: 1) is blocked by another piece.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
-        }
+//        
+//        [Test]
+//        public void MoveChessPieceThrows_GivenCastlingMove_WhenKingMovesOverAttackedPosition()
+//        {
+//            var engine = new ChessEngine();
+//            var kingStartingPosition = new Position(0, 4);
+//            var kingTargetPosition = new Position(0, 2);
+//            var attackingPosition= new Position(7, 3);
+//            var rookPosition = new Position(0, 0);
+//
+//            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
+//            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
+//            _emptyChessBoard.SetPosition(attackingPosition, new Queen("White"));
+//
+//            Assert.Throws(
+//                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+//                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+//                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
+//        }
         
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfPawnIsMovedStraightOnePlaceAndTargetPositionIsOccupied()
+        public void MoveChessPieceThrows_GivenCastlingMove_WhenKingHasAlreadyMoved()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(1, 2);
-            var targetPosition = new Position(2, 2);
+            var kingStartingPosition = new Position(0, 4);
+            var kingTargetPosition = new Position(0, 2);
+            var rookPosition = new Position(0, 0);
 
-            _startingChessBoard.ChessPieces[targetPosition.Row, targetPosition.Column] = new Bishop("white");
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
+            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
+            _emptyChessBoard.GetPiece(kingStartingPosition).MarkAsMoved();
 
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
-
-            const string expectedErrorMessage = "This move (Rows: 1, Cols: 0) is blocked by another piece.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
-        
+
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfPawnIsMovedStraightTwoPlacesAndTargetPositionIsOccupied()
+        public void MoveChessPieceThrows_GivenCastlingMove_WhenRookHasAlreadyMoved()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(1, 2);
-            var targetPosition = new Position(3, 2);
+            var kingStartingPosition = new Position(0, 4);
+            var kingTargetPosition = new Position(0, 2);
+            var rookPosition = new Position(0, 0);
 
-            _startingChessBoard.ChessPieces[targetPosition.Row, targetPosition.Column] = new Bishop("white");
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
+            _emptyChessBoard.SetPosition(rookPosition, new Rook("black"));
+            _emptyChessBoard.GetPiece(rookPosition).MarkAsMoved();
 
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
-
-            const string expectedErrorMessage = "This move (Rows: 2, Cols: 0) is blocked by another piece.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
-        
+
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfAPieceFromTheSameTeamOccupiesAPositionBetweenSourceAndTarget()
+        public void MoveChessPieceThrows_GivenCastlingMove_WhenRookPositionIsEmpty()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(2, 5);
-            var targetPosition = new Position(5, 2);
-            var blockingPosition = new Position(4, 3);
+            var kingStartingPosition = new Position(0, 4);
+            var kingTargetPosition = new Position(0, 2);
 
-            _startingChessBoard.ChessPieces[startingPosition.Row, startingPosition.Column] = new Queen("black");
-            _startingChessBoard.ChessPieces[targetPosition.Row, targetPosition.Column] = new Rook("white");
-            _startingChessBoard.ChessPieces[blockingPosition.Row, blockingPosition.Column] = new Knight("black");
-            
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
 
-            const string expectedErrorMessage = "This move (Rows: 2, Cols: 0) is blocked by another piece.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
         }
-        
+
         [Test]
-        public void MoveChessPiece_ReturnsSameBoardWithErrorMessage_IfAPieceFromTheOpposingTeamOccupiesAPositionBetweenSourceAndTarget()
+        public void MoveChessPieceThrows_GivenCastlingMove_WhenRookPositionContainsNonRook()
         {
             var engine = new ChessEngine();
-            var startingPosition = new Position(2, 5);
-            var targetPosition = new Position(5, 2);
-            var blockingPosition = new Position(4, 3);
+            var kingStartingPosition = new Position(0, 4);
+            var kingTargetPosition = new Position(0, 2);
+            var rookPosition = new Position(0, 0);
 
-            _startingChessBoard.ChessPieces[startingPosition.Row, startingPosition.Column] = new Queen("black");
-            _startingChessBoard.ChessPieces[targetPosition.Row, targetPosition.Column] = new Rook("white");
-            _startingChessBoard.ChessPieces[blockingPosition.Row, blockingPosition.Column] = new Knight("white");
-            
-            var newChessBoard = engine.MoveChessPiece(_startingChessBoard, startingPosition, targetPosition);
+            _emptyChessBoard.SetPosition(kingStartingPosition, new King("black"));
+            _emptyChessBoard.SetPosition(rookPosition, new Queen("black"));
 
-            const string expectedErrorMessage = "This move (Rows: 2, Cols: 0) is blocked by another piece.";
-            Assert.AreEqual(expectedErrorMessage, newChessBoard.ErrorMessage);
-            Assert.AreEqual(_startingChessBoard, newChessBoard);
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 0, Cols: -2) is not valid for this piece (black King)."),
+                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
+        }
+
+        [Test]
+        public void MoveChessPieceThrows_GivenTargetPositionOccupiedByTheSameTeam()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(1, 0);
+
+            _emptyChessBoard.SetPosition(startingPosition, new Rook("black"));
+            _emptyChessBoard.SetPosition(targetPosition, new Pawn("black"));
+
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 1, Cols: 0) is blocked by another piece."),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+        }
+
+        [Test]
+        public void MoveChessPieceThrows_GivenNormalPawnForwardMove_WhenTargetPositionIsOccupiedByOpponent()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(1, 0);
+
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
+            _emptyChessBoard.SetPosition(targetPosition, new Bishop("white"));
+
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 1, Cols: 0) is blocked by another piece."),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+        }
+
+        [Test]
+        public void MoveChessPieceThrows_GivenSpecialPawnForwardMove_WhenTargetPositionIsOccupiedByOpponent()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(2, 0);
+
+            _emptyChessBoard.SetPosition(startingPosition, new Pawn("black"));
+            _emptyChessBoard.SetPosition(targetPosition, new Bishop("white"));
+
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 2, Cols: 0) is blocked by another piece."),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+        }
+
+        [Test]
+        public void MoveChessPieceThrows_GivenMoveBlockedBySameTeam()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(2, 0);
+            var blockingPosition = new Position(1, 0);
+
+            _emptyChessBoard.SetPosition(startingPosition, new Rook("black"));
+            _emptyChessBoard.SetPosition(targetPosition, new Queen("white"));
+            _emptyChessBoard.SetPosition(blockingPosition, new Knight("black"));
+
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 2, Cols: 0) is blocked by another piece."),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+        }
+
+        [Test]
+        public void MoveChessPieceThrows_GivenMoveBlockedByOpponent()
+        {
+            var engine = new ChessEngine();
+            var startingPosition = new Position(0, 0);
+            var targetPosition = new Position(2, 0);
+            var blockingPosition = new Position(1, 0);
+
+            _emptyChessBoard.SetPosition(startingPosition, new Rook("black"));
+            _emptyChessBoard.SetPosition(targetPosition, new Queen("white"));
+            _emptyChessBoard.SetPosition(blockingPosition, new Knight("white"));
+
+            Assert.Throws(
+                Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
+                    "This move (Rows: 2, Cols: 0) is blocked by another piece."),
+                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
         }
     }
 }
