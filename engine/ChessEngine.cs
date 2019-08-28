@@ -20,8 +20,10 @@ namespace engine
             };
         }
 
-        public ChessGame MoveChessPiece(ChessBoard chessBoard, Position startPosition, Position targetPosition)
+        public ChessGame MoveChessPiece(ChessGame game, Position startPosition, Position targetPosition)
         {
+            var chessBoard = new ChessBoard(game.Board);
+            
             if (!chessBoard.IsValidPosition(startPosition))
             {
                 var errorMessage = $"The starting position ({startPosition}) is not on the board";
@@ -70,14 +72,38 @@ namespace engine
                 throw new InvalidOperationException(errorMessage);
             }
 
-            // make move (inc removal of pieces)
-            
-            // return updated board
+            chessBoard.SetPosition(startPosition, null);
+
+            if (pieceInSource.Type == "Pawn")
+            {
+                switch (pieceInSource.Colour)
+                {
+                    case Player.Black when targetPosition.Row == 7:
+                        chessBoard.SetPosition(targetPosition, new Queen(Player.Black));
+                        game.RemovedPieces.Add(pieceInSource);
+                        break;
+                    case Player.White when targetPosition.Row == 0:
+                        chessBoard.SetPosition(targetPosition, new Queen(Player.White));
+                        game.RemovedPieces.Add(pieceInSource);
+                        break;
+                }
+            }
+            else
+            {
+                chessBoard.SetPosition(targetPosition, pieceInSource);
+            }
+
+            if (pieceInTarget != null)
+            {
+                game.RemovedPieces.Add(pieceInTarget);
+            }
+
             return new ChessGame
             {
                 Board = new ChessBoard().GetBoard(),
-                ActivePlayer = Player.White,
-                GameState = ""
+                ActivePlayer = game.ActivePlayer == Player.White ? Player.Black : Player.White,
+                GameState = "",
+                RemovedPieces = game.RemovedPieces
             };
         }
 

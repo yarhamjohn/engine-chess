@@ -1,13 +1,14 @@
-﻿using engine.Pieces;
+﻿using System.Collections.Generic;
+using engine.Pieces;
 
 namespace engine.Game
 {
     public class ChessGame
     {
         public ChessPiece[,] Board;
-        public Player ActivePlayer; // Enum?
+        public Player ActivePlayer;
         public string GameState; // Enum?
+        public List<ChessPiece> RemovedPieces;
         // Something to do with checkmate?
-        // list of removed pieces?
     }
 }

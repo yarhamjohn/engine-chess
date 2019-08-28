@@ -10,11 +10,16 @@ namespace engine_tests
     public class ChessEngineTests
     {
         private ChessBoard _emptyChessBoard;
+        private ChessGame _chessGame;
 
         [SetUp]
         public void Setup()
         {
             _emptyChessBoard = new ChessBoard();
+            _chessGame = new ChessGame
+            {
+                Board = _emptyChessBoard.GetBoard()
+            };
         }
 
         [Test]
@@ -27,7 +32,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "The starting position (Row: 0, Col: 0) was the same as the target position (Row: 0, Col: 0)"),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -41,7 +46,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "The starting position (Row: 0, Col: 8) is not on the board"),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -54,7 +59,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "The target position (Row: -1, Col: 0) is not on the board"),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -67,7 +72,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "There is no piece in the starting position (Row: 0, Col: 0)"),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -82,7 +87,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 7, Cols: 7) is not valid for this piece (Black Pawn)."),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -98,7 +103,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 2, Cols: 0) is not valid for this piece (Black Pawn)."),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [TestCase(1)]
@@ -119,7 +124,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
-                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
+                () => engine.MoveChessPiece(_chessGame, kingStartingPosition, kingTargetPosition));
         }
 //        
 //        [Test]
@@ -156,7 +161,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
-                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
+                () => engine.MoveChessPiece(_chessGame, kingStartingPosition, kingTargetPosition));
         }
 
         [Test]
@@ -174,7 +179,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
-                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
+                () => engine.MoveChessPiece(_chessGame, kingStartingPosition, kingTargetPosition));
         }
 
         [Test]
@@ -189,7 +194,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
-                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
+                () => engine.MoveChessPiece(_chessGame, kingStartingPosition, kingTargetPosition));
         }
 
         [Test]
@@ -206,7 +211,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 0, Cols: -2) is not valid for this piece (Black King)."),
-                () => engine.MoveChessPiece(_emptyChessBoard, kingStartingPosition, kingTargetPosition));
+                () => engine.MoveChessPiece(_chessGame, kingStartingPosition, kingTargetPosition));
         }
 
         [Test]
@@ -222,7 +227,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 1, Cols: 0) is blocked by another piece."),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -238,7 +243,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 1, Cols: 0) is blocked by another piece."),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -254,7 +259,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 2, Cols: 0) is blocked by another piece."),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -272,7 +277,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 2, Cols: 0) is blocked by another piece."),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
 
         [Test]
@@ -290,7 +295,7 @@ namespace engine_tests
             Assert.Throws(
                 Is.TypeOf<InvalidOperationException>().And.Message.EqualTo(
                     "This move (Rows: 2, Cols: 0) is blocked by another piece."),
-                () => engine.MoveChessPiece(_emptyChessBoard, startingPosition, targetPosition));
+                () => engine.MoveChessPiece(_chessGame, startingPosition, targetPosition));
         }
     }
 }
