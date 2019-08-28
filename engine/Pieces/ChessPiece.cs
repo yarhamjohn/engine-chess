@@ -8,17 +8,17 @@ namespace engine.Pieces
         public bool HasMoved;
         public Guid Id;
 
-        protected ChessPiece()
-        {
-            Id = Guid.NewGuid();
-            HasMoved = false;
-        }
-
         protected internal abstract string Type { get; set; }
         protected internal abstract string Colour { get; set; }
         protected abstract string Symbol { get; set; }
         protected internal abstract List<(int x, int y)> NormalMoves { get; set; }
         protected internal abstract List<(int x, int y)> SpecialMoves { get; set; }
+        
+        protected ChessPiece()
+        {
+            Id = Guid.NewGuid();
+            HasMoved = false;
+        }
 
         public bool Equals(ChessPiece other)
         {

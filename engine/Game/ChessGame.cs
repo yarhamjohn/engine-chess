@@ -8,5 +8,6 @@ namespace engine.Game
         public string ActivePlayer; // Enum?
         public string GameState; // Enum?
         // Something to do with checkmate?
+        // list of removed pieces?
     }
 }

@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace engine_tests
 {
+    [TestFixture]
     public class ChessBoardBuilderTests
     {
         [Test]

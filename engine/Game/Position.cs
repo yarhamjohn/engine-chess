@@ -28,64 +28,42 @@ namespace engine.Game
 
         public List<Position> GetIntermediatePositions(Position position)
         {
-            if (Row == position.Row && Column == position.Column)
+            var positions = new List<Position>();
+            var rowsToTraverse = position.Row - Row;
+            var colsToTraverse = position.Column - Column;
+            var rowDirection = rowsToTraverse == 0 ? 0 : rowsToTraverse / Math.Abs(rowsToTraverse);
+            var colDirection = colsToTraverse == 0 ? 0 : colsToTraverse / Math.Abs(colsToTraverse);
+
+            if (rowsToTraverse == 0 && colsToTraverse == 0)
             {
-                return new List<Position>();
-            }
-
-            if (Row == position.Row)
-            {
-                var positions = new List<Position>();
-                var colsToTraverse = position.Column - Column;
-
-                if (colsToTraverse < 0)
-                {
-                    for (var i = -1; i > colsToTraverse; i--)
-                    {
-                        positions.Add(new Position(Row, Column + i));
-                    }
-                }
-                else
-                {
-                    for (var i = 1; i < colsToTraverse; i++)
-                    {
-                        positions.Add(new Position(Row, Column + i));
-                    }
-                }
-
                 return positions;
             }
-            
-            
-            if (Column == position.Column)
+
+            if (rowsToTraverse == 0)
             {
-                var positions = new List<Position>();
-                var rowsToTraverse = position.Row - Row;
-
-                if (rowsToTraverse < 0)
+                for (var i = Math.Abs(colDirection); i < Math.Abs(colsToTraverse); i++)
                 {
-                    for (var i = -1; i > rowsToTraverse; i--)
-                    {
-                        positions.Add(new Position(Row + i, Column));
-                    }
+                    positions.Add(new Position(Row, Column + i * colDirection));
                 }
-                else
-                {
-                    for (var i = 1; i < rowsToTraverse; i++)
-                    {
-                        positions.Add(new Position(Row + 1, Column));
-                    }
-                }
-
-                return positions;
             }
             
-            // row + col +
-            // row - col +
-            // row + col -
-            // row - col -
+            if (colsToTraverse == 0)
+            {
+                for (var i = Math.Abs(rowDirection); i < Math.Abs(rowsToTraverse); i++)
+                {
+                    positions.Add(new Position(Row + i * rowDirection, Column));
+                }
+            }
 
-            return new List<Position>();
+            if (rowsToTraverse != 0 && colsToTraverse != 0)
+            {
+                for (var i = Math.Abs(rowDirection); i < Math.Abs(rowsToTraverse); i++)
+                {
+                    positions.Add(new Position(Row + i * rowDirection, Column + i * colDirection));
+                }
+            }
+            
+            return positions;
         }
     }
 }

@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 namespace engine_tests
 {
+    [TestFixture]
     public class ChessEngineTests
     {
         private const string Black = "black";
